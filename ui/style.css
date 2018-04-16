@@ -23,6 +23,7 @@ padding: 15px;
 .col-10 {width: 83.33%;}
 .col-11 {width: 91.66%;}
 .col-12 {width: 100%;}
+
 html {
   font-family: "Lucida Sans", sans-serif;
 }
@@ -61,10 +62,6 @@ html {
 
 .large-button {
   height: 40px;
-}
-
-.button-selected {
-  background-color: green;
 }
 
 .center-align {

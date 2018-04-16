@@ -4,7 +4,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
   <link rel="stylesheet" href="style.css">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>DBI Garage Door App</title>
+  <title>PotWatch App</title>
 
   <!-- Load the Particle JavaScript --> <!--particle must be loaded before -->
   <script src="./resources/particle/particle.min.js"></script>
@@ -15,94 +15,20 @@
 
 <body>
 
-
-  <!-- Account Creation Page =================================================-->
-  <div id="accountcreation">
-    <!-- Title -->
+  <!-- Cover Page ==========================================-->
+  <div id="cover">
     <div class="header row col-12">
-      <h1>DBI Account Creation</h1>
-    </div>
-
-    <!-- Username Text -->
-    <div class="row">
-      <div class="col-12 center-align">
-        <input type="button" class="button medium-button" value="< Login" onclick="loadLogin()" />
-      </div>
-    </div>
-
-    <!-- Username Box -->
-    <div class="row">
-      <div class="col-12 center-align">
-        <label>Username: <input type="text" class="textinput" required></label>
-      </div>
-    </div>
-
-    <!-- Password Text -->
-    <div class="row">
-      <div class="col-12 center-align">
-        <label>Password: <input type="password" class="textinput" required></label>
-      </div>
-    </div>
-
-    <!-- Password Box -->
-    <div class="row">
-      <div class="col-12 center-align">
-        <label>Confirm Password: <input type="password" class="textinput" required></label>
-      </div>
-    </div>
-
-    <!-- Sign Up Button -->
-    <div class="row">
-      <div class="col-12 center-align">
-        <input type="button" class="button medium-button" value="Sign Up" onclick="loadLogin()" />
-      </div>
-    </div>
-  </div>
-
-
-
-
-
-
-
-
-
-  <!-- Advanced Features Page ==========================================-->
-  <div id="advancedfeatures">
-    <div class="header row col-12">
-      <h1>DBI Advanced Garage Controls</h1>
+      <h1>PotWatch</h1>
     </div>
     <!-- Go back to the basic controls page -->
     <div class="row">
       <div class="col-12 center-align">
-        <input type="button" class="button medium-button" value="< Basic Controls" onclick="loadControls()" />
+        <img src="potWatchIcon.png" alt="icon" style="width:200px;height:300px;">
       </div>
     </div>
-    <!-- Allows for input of 1 second to 99 hours and lets you turn on the automatic door closing ability -->
     <div class="row">
       <div class="col-12 center-align">
-        <label>Door Auto-Close: </label>
-        <input type="text" class="tiny-text" placeholder="Time in Seconds" id="autoCloseTime">
-        <label>(5s-60s)</label>
-        <input type="button" class="button medium-button" id= "autoDoorCloseTimeSet" value="Set"/>
-        <input type="button" class="button medium-button" id= "autoDoorCloseOn" value="On"/>
-        <input type="button" class="button medium-button" id= "autoDoorCloseOff" value="Off"/>
-      </div>
-    </div>
-    <!-- Slider to control the brightness of the lights -->
-    <div class="row">
-      <div class="col-12 center-align">
-        <label>Light Brightness: </label>
-        <input id="lightSlider" type="range" min="0" max="100">
-        <span id="lightBrightness">0</span>
-      </div>
-    </div>
-    <!-- Allows for input of 1 second to 99 hours and lets you turn on the automatic off lighting -->
-    <div class="row">
-      <div class="col-12 center-align">
-        <label>Light Auto-Off: </label>
-        <input type="text" class="tiny-text" placeholder="Time in Seconds" id="autoOffTime">
-        <input type="button" class="button medium-button" id= "autoOffLightTimeSet" value="Set"/>
+        <input type="button" class="button medium-button" value="Basic Controls >" onclick="loadControls()" />
       </div>
     </div>
   </div>
@@ -118,40 +44,58 @@
   <!-- Controls Page =========================================-->
   <div id="controls">
     <div class="header row col-12">
-      <h1>DBI Basic Garage Controls</h1>
+      <h1>PotWatch Controls</h1>
     </div>
-    <!-- Open or close the garage door, and see status -->
+
+    <!-- Back to Cover page?-->
+    <div class="row">
+      <div class="col-3 center-align">
+        <input type="button" class="button medium-button" value="< Back" onclick="loadCover()" />
+      </div>
+    </div>
+    <!-- temperature, current cooking state,time left in state-->
     <div class="row">
       <div class="col-12 center-align">
-        <p id="door-status"><p>
+        <label id="temp-status"><font size="20">0</font><label>
+        <label><font size="20">ºF</font><label>
       </div>
     </div>
     <div class="row">
       <div class="col-12 center-align">
-        <label>Door: </label>
-        <input type="button" class="button medium-button" id="changeDoor" value="Open/Close"/>
+        <label id="state-status"><font size="5">Idle</font><label>
       </div>
     </div>
-    <!-- Turn off or on the lights, and see status -->
     <div class="row">
       <div class="col-12 center-align">
-        <label>Light: </label>
-        <input type="button" class="button medium-button" id="changeLight" value="On/Off"/>
+        <label id="timer-status"><font size="5">0</font><label>
+        <label><font size="5">minute(s) remaining</font><label>
       </div>
     </div>
-    <!-- Go to the advanced features page -->
+
+<!-- alert Options -->
+<div class="row">
+  <div class="col-6 center-align">
+    <label><u>Alert Options</u>: </label>
+</div>
+    <!-- set the alert time -->
     <div class="row">
       <div class="col-12 center-align">
-        <input type="button" class="button medium-button" value="Advanced Features" onclick="loadAdvancedFeatures() " />
-      </div>
+        <label>Timer: </label>
+        <input id="timerSlider" type="range" min="0" max="100">
+        <span id="Timer">0</span>
+        <label> minutes </label>
+        <input type="button" class="button medium-button" id= "timerSet" value="Set"/>
     </div>
-    <!-- Sign out and go back to the login screen -->
+    <!-- set the alert temperature -->
     <div class="row">
       <div class="col-12 center-align">
-        <input type="button" class="button medium-button" value="Log Out" onclick="loadLogin()" />
+        <label> Temp: </label>
+        <input id="tempSlider" type="range" min="0" max="100">
+        <span id="Temp">0</span>
+        <label> ºF </label>
+        <input type="button" class="button medium-button" id= "tempSet" value="Set"/>
       </div>
     </div>
-  </div>
 
 
 
@@ -160,38 +104,7 @@
 
 
 
-
-  <!-- Login Page ===========================-->
-  <div id="login">
-    <div class="header row col-12">
-      <h1>DBI Login</h1>
-    </div>
-    <!-- Username input -->
-    <div class="row">
-      <div class="col-12 center-align">
-        <label>Username: <input type="text" class="textinput" required></label>
-      </div>
-    </div>
-    <!-- Password input -->
-    <div class="row">
-      <div class="col-12 center-align">
-        <label>Password: <input type="password" class="textinput" required></label>
-      </div>
-    </div>
-    <!-- Login button takes you to the controls page -->
-    <div class="row">
-      <div class="col-12 center-align">
-        <input type="button" class="button medium-button" value="Login" onclick="loadControls()" />
-      </div>
-    </div>
-    <!-- Sign up button takes you to the account creation page -->
-    <div class="row">
-      <div class="col-12 center-align">
-        <input type="button" class="button medium-button" value="Sign Up" onclick="loadAccountCreation()" />
-      </div>
-    </div>
-  </div>
   <!-- <script src = "./GarageModel.js"> </script> -->
-  <script src = "Garage.js" type="text/javascript"> </script>
-  <script src = "GarageApp.js" type="text/javascript"> </script>
+  <script src = "Watch.js" type="text/javascript"> </script>
+  <script src = "WatchApp.js" type="text/javascript"> </script>
 </body>
