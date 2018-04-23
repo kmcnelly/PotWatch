@@ -158,17 +158,17 @@ void loop() {
     }
   }
 
-  getDebouncedLightInput();
-  if (lightStateChanged)
-  {
-
-    lightStateChanged = false;
-    if (debouncedLightState)
-    {
-      Particle.publish("lightPush", "", 60, PRIVATE);
-      Serial.println("publish light");
-    }
-  }
+  // getDebouncedLightInput();
+  // if (lightStateChanged)
+  // {
+  //
+  //   lightStateChanged = false;
+  //   if (debouncedLightState)
+  //   {
+  //     Particle.publish("lightPush", "", 60, PRIVATE);
+  //     Serial.println("publish light");
+  //   }
+  // }
 
   display.clearDisplay();
   display.setCursor(0, 0);
