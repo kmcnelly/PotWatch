@@ -1,8 +1,8 @@
-var myParticleAccessToken = "f76cd4700e1489f30c1fdf0f54d702d63236800c";
-var myDeviceId =            "530025000e51353532343635";
-var topic =                 "cse222Garage/thisGarage";
+var myParticleAccessToken = "f76cd4700e1489f30c1fdf0f54d702d63236800c";//find out when plug in
+var myDeviceId =            "1f003c001947343438323536";
+var topic =                 "thisWatch";
 
-function newGarageEvent(objectContainingData) {
+function newWatchEvent(objectContainingData) {
   // TODO: Parse the incoming state and update any listeners
   // Hints:
   //    1. Use console.dir() to show the state object on the console.
@@ -13,102 +13,158 @@ function newGarageEvent(objectContainingData) {
   //console.log(objectContainingData);
   console.dir(obj);
   console.log(obj.state);
-  switch (obj.state)
-  {
-    case 0: // OPEN
-    garage.door.state = "open";
-    console.log("open");
-    break;
-    case 1: // CLOSED
-    garage.door.state = "closed";
-    console.log("closed");
-    break;
-    case 2: // OPENING
-    garage.door.state = "opening";
-    console.log("opening");
-    break;
-    case 3: // CLOSING
-    garage.door.state = "closing";
-    console.log("closing");
-    break;
-  }
-  console.log(garage.door.state);
-
-  switch (obj.lS)
-  {
-    case "0": // ON
-    garage.light.on = true;
-    break;
-    case "1": // FADING
-    garage.light.on = true;
-    break;
-    case "2": // OFF
-    garage.light.on = false;
-    break;
-  }
-  console.log(garage.light.on);
-
-  garage.door.autoClose.enabled = obj.aCE;
-
-  garage.door.autoClose.time = obj.aCT;
-
-  garage.light.brightness = obj.lB;
-
-  garage.light.autoOff.time = obj.aOT;
+  // switch (obj.state)
+  // {
+  //   case 0: // OPEN
+  //   garage.door.state = "open";
+  //   console.log("open");
+  //   break;
+  //   case 1: // CLOSED
+  //   garage.door.state = "closed";
+  //   console.log("closed");
+  //   break;
+  //   case 2: // OPENING
+  //   garage.door.state = "opening";
+  //   console.log("opening");
+  //   break;
+  //   case 3: // CLOSING
+  //   garage.door.state = "closing";
+  //   console.log("closing");
+  //   break;
+  // }
+  // console.log(garage.door.state);
+  //
+  // switch (obj.lS)
+  // {
+  //   case "0": // ON
+  //   garage.light.on = true;
+  //   break;
+  //   case "1": // FADING
+  //   garage.light.on = true;
+  //   break;
+  //   case "2": // OFF
+  //   garage.light.on = false;
+  //   break;
+  // }
+  // console.log(garage.light.on);
+  //
+  // garage.door.autoClose.enabled = obj.aCE;
+  //
+  // garage.door.autoClose.time = obj.aCT;
+  //
+  // garage.light.brightness = obj.lB;
+  //
+  // garage.light.autoOff.time = obj.aOT;
 
   updateGarage();
 }
-
-var garage = {
+//AHHHHHHH MESSED UP BRACKETS
+var watch = {
 
   // NOTE: A new object to access particle JavaScript functions
   particle: new Particle(),
 
-  door: {
-    state: "closed",
-    autoClose: {
-      enabled: false,
-      time: 5000 // 5 seconds
+  state: "closed",
+
+  getState: function() {
+    return watch.state;
+  },
+  changeState: function(){
+    watch.buttonPush();
+    watch.sendState(this.state);
+  }
+
+
+  buttonPush: function() {
+    console.log("(fake) button pushed");
+    callParticleFunction("trigButton", "test");
+  },
+
+  sendState: function(myState){
+    this.state = myState;
+    callParticleFunction("publishState", "" + this.state);
+  }
+
+  temp: {
+    enabled: false,
+    curTemp: 0,
+    tempTarget: 30, // 30 deg
+
+    getTime: function(){
+      return watch.time.curTime;
+    }
+
+    //update CURRENT temperature
+    changeTemp: function(newTemp){
+      watch.temp.curTemp = newTemp;
+      callParticleFunction("publishState","" + this.curTemp)
     },
-    getState: function() {
-      return garage.door.state;
-    },
-    changeState: function() {
-      //simulate button push
-      garage.door.buttonPush();
-      garage.door.sendState();
-    },
-    getAutoCloseEnabled: function () {
-      return garage.door.autoClose.enabled;
-    },
-    getAutoCloseTime: function() {
-      return garage.door.autoClose.time;
-    },
-    sendState: function(myState) {
-      this.state = myState;
-      callParticleFunction("publishState", "" + this.state);
-    },
-    buttonPush: function() {
-      console.log("(fake) button pushed");
-      callParticleFunction("trigButton", "test");
-    },
-    changeAutoClose: function(s) {
-      console.log("autoclose changed");
-      callParticleFunction("changeAC", s);
-    },
-    changeAutoCloseTime: function(t) {
-      if(t > 60){
-        newTime = 60;
-        alert('time set for greater than 60s, Garage cant wait that long!');
-      }
-      else if(t < 5){
-        newTime = 5;
-        alert('time set for less than 5s, Garage aint that quick!');
-      }
-      console.log("autoclose time changed");
-      callParticleFunction("changeACT", t);
+
+    //update TARGET temperature
+    setTemp: function(nextTemp){
+      watch.temp.tempTarget = nextTemp;
+      callParticleFunction("publishState",""+ this.tempTarget);
     }
   },
+
+  time: {
+    enabled: false,
+    curTime: 0,
+    timeTarget: 30, // 30 deg
+
+    getTime: function(){
+      return watch.time.curTime;
+    }
+
+    //update CURRENT time
+    changeTime: function(newTime){
+      watch.time.curTime = newTime;
+      callParticleFunction("publishState","" + this.curTime)
+    },
+
+    //update TARGET time
+    setTime: function(nextTime){
+      watch.time.timeTarget = nextTime;
+      callParticleFunction("publishState","" + this.timeTarget)
+    }
+  },
+  //
+  //   changeState: function() {
+  //     //simulate button push
+  //     watch.cook.buttonPush();
+  //     watch.cook.sendState();
+  //   },
+  //   getAutoCloseEnabled: function () {
+  //     return garage.door.autoClose.enabled;
+  //   },
+  //   getAutoCloseTime: function() {
+  //     return garage.door.autoClose.time;
+  //   },
+  //   sendState: function(myState) {
+  //     this.state = myState;
+  //     callParticleFunction("publishState", "" + this.state);
+  //   },
+  //   buttonPush: function() {
+  //     console.log("(fake) button pushed");
+  //     callParticleFunction("trigButton", "test");
+  //   },
+  //   changeAutoClose: function(s) {
+  //     console.log("autoclose changed");
+  //     callParticleFunction("changeAC", s);
+  //   },
+  //   changeAutoCloseTime: function(t) {
+  //     if(t > 60){
+  //       newTime = 60;
+  //       alert('time set for greater than 60s, Garage cant wait that long!');
+  //     }
+  //     else if(t < 5){
+  //       newTime = 5;
+  //       alert('time set for less than 5s, Garage aint that quick!');
+  //     }
+  //     console.log("autoclose time changed");
+  //     callParticleFunction("changeACT", t);
+  //   }
+  // },
   light: {
     on: false,
     brightness: 50, // 50% brightness
@@ -177,22 +233,22 @@ function setup() {
 // Observer Function===================================
 // sends an update so that the UI can be updated
 function updateGarage() {
-  if(garage.observerFunc){
-    garage.observerFunc(garage);
+  if(watch.observerFunc){
+    watch.observerFunc(watch);
   }
 }
 
 //sets observer as a func and updates
 function setObserverFunc(observerFunc){
-  garage.observerFunc = observerFunc;
+  watch.observerFunc = observerFunc;
   updateGarage();
 }
 
-garage.particle.getEventStream( { name: topic, auth: myParticleAccessToken }).then(
+watch.particle.getEventStream( { name: topic, auth: myParticleAccessToken }).then(
   function (stream) {
     // DONE:  This will "subscribe' to the stream and get the state"
     console.log("getEventStream success");
-    stream.on("event", newGarageEvent);
+    stream.on("event", newWatchEvent);
 
     // NOTE: This is here in the callback to the subscribe --- it will request the state
     //       once successbully subscribed.

@@ -35,6 +35,10 @@ html {
   text-align: center;
 }
 
+.stateBox {
+  background-color: #f4b042;
+}
+
 .tiny-text {
   width: 100px;
 }
