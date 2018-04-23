@@ -20,7 +20,7 @@ String gState = "Closed";
 String lState = "Off";
 
 const int button_pin = 0;
-const int light_pin = 1;
+//const int light_pin = 1;
 
 const int debounceDelay = 100; // 100ms debounce delay for main button
 
@@ -29,10 +29,10 @@ bool debouncedButtonState = false;
 bool lastButtonState = false; // last button state, for use in debouncing
 bool buttonStateChanged = false;
 
-unsigned long lastDebounceLightTime = 0;
-bool debouncedLightState = false;
-bool lastLightState = false; // last button state, for use in debouncing
-bool lightStateChanged = false;
+// unsigned long lastDebounceLightTime = 0;
+// bool debouncedLightState = false;
+// bool lastLightState = false; // last button state, for use in debouncing
+// bool lightStateChanged = false;
 
 
 //Methods=================================================================
@@ -127,7 +127,7 @@ void setup() {
   Serial.begin(9600);
   //setup buttons
   pinMode(button_pin, INPUT_PULLUP);
-  pinMode(light_pin, INPUT_PULLUP);
+  // pinMode(light_pin, INPUT_PULLUP);
 
 
   //setup display
@@ -175,8 +175,8 @@ void loop() {
   // The core of your code will likely live here.
   display.println("Garage:");
   display.println(gState);
-  display.println("Light:");
-  display.println(lState);
+  // display.println("Light:");
+  // display.println(lState);
   display.display();
 
 //  delay(500);
