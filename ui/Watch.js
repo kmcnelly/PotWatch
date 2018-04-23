@@ -56,7 +56,7 @@ function newWatchEvent(objectContainingData) {
   //
   // garage.light.autoOff.time = obj.aOT;
 
-  updateGarage();
+  updateWatch();
 }
 //AHHHHHHH MESSED UP BRACKETS
 var watch = {
@@ -90,7 +90,7 @@ var watch = {
     curTemp: 0,
     tempTarget: 30, // 30 deg
 
-    getTime: function(){
+    getTemp: function(){
       return watch.time.curTime;
     }
 

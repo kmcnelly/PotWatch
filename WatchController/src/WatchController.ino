@@ -359,6 +359,7 @@ void loop() {
   if(millis() - lastUpdate >= updateDelay){
     readTemp();
     lastUpdate = millis();
+    Particle.publish("temp," curTemp, 60, PRIVATE);
   }
 
 }

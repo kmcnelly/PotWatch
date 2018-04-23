@@ -18,6 +18,11 @@ document.addEventListener("DOMContentLoaded", function (){
 // updates the on-screen elements based on the model
 function updateUI(updatedWatchObject){
   // Controls Page =============================================================================
+  if (updatedWatchObject.getState() === undefined) {
+    // Hey dont do that
+  } else {
+    document.getElementById("temp-status").innerText = updatedWatchObject.getTemp();
+  }
 
   // Current time state
   // document.getElementById("timer-status").innerText = "Time " + /*updatedWatchObject.timer.getMin() */+ ".";
