@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 Progress:
 Completed a interactive UI system
 made progress on Hardware
@@ -11,3 +12,5 @@ The main priority and requirement is to have a functional embedded system that i
 The second priority is integrating a confirm button and buzzer/light.
   at the transition 
   the light with be an indicator that
+=======
+>>>>>>> parent of fede681... ui and fritzing
