@@ -16,26 +16,24 @@
 Adafruit_SSD1306 display(OLED_DC, OLED_RESET, OLED_CS);
 
 
-String gState = "Closed";
+String status = "Idle"; //idle, prep, cooking
 
-String lState = "Off";
 
 const int button_pin = 0;
 //const int light_pin = 1;
 
 const int debounceDelay = 100; // 100ms debounce delay for main button
-const int updateDelay = 5000;//reads temp every 5 sec
 
 unsigned long lastDebounceTime = 0;
 bool debouncedButtonState = false;
 bool lastButtonState = false; // last button state, for use in debouncing
 bool buttonStateChanged = false;
 
-// unsigned long lastDebounceLightTime = 0;
-// bool debouncedLightState = false;
-// bool lastLightState = false; // last button state, for use in debouncing
-// bool lightStateChanged = false;
+
 //Temp Sensor===================================
+
+const int updateDelay = 3000;//reads temp every 5 sec
+
 
 OneWire ds = OneWire(D0);  // 1-wire signal on pin D4
 
@@ -43,6 +41,9 @@ unsigned long lastUpdate = 0;
 
 float lastTemp;
 float curTemp;
+
+//STATE====================================
+
 
 //Methods=================================================================
 
@@ -93,19 +94,19 @@ void getDebouncedButtonInput() {
 //     int curStateVal = curState.toInt();
 //     switch (curStateVal){
 //       case 0:
-//       gState = "Open";
+//       status = "Open";
 //       break;
 //
 //       case 1:
-//       gState = "Closed";
+//       status = "Closed";
 //       break;
 //
 //       case 2:
-//       gState = "Opening";
+//       status = "Opening";
 //       break;
 //
 //       case 3:
-//       gState = "Closing";
+//       status = "Closing";
 //       break;
 //     }
 //
@@ -345,9 +346,8 @@ void loop() {
   display.setCursor(0, 0);
   // The core of your code will likely live here.
   display.println("HI:");
-  display.println(gState);
-  // display.println("Light:");
-  // display.println(lState);
+  display.println(status);
+
   display.display();
   if(millis() - lastUpdate >= updateDelay){
     readTemp();
