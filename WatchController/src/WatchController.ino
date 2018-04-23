@@ -16,7 +16,7 @@
 Adafruit_SSD1306 display(OLED_DC, OLED_RESET, OLED_CS);
 
 
-String status = "Idle"; //idle, prep, cooking
+
 
 
 const int button_pin = 0;
@@ -43,6 +43,13 @@ float lastTemp;
 float curTemp;
 
 //STATE====================================
+enum State
+{
+  Idle,
+  Prep,
+  Cooking,
+  Cooling
+};
 
 
 //Methods=================================================================
