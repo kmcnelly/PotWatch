@@ -2,9 +2,9 @@
 //when html loads
 document.addEventListener("DOMContentLoaded", function (){
 
-  // setObserverFunc(updateUI);
+  setObserverFunc(updateUI);
   loadCover();
-  setup();
+  // setup();
   // Controls Page =============================================================================
 
   //listen for timer
@@ -13,6 +13,15 @@ document.addEventListener("DOMContentLoaded", function (){
   //listen for temp
   document.getElementById("tempSlider").addEventListener("change",changeTemp);
 
+  //listen for Target time set button
+  document.getElementById("timerSet").addEventListener("click",setTimer);
+
+  //listen for Target temp set button
+  document.getElementById("tempSet").addEventListener("click",setTemp);
+
+  //listen for Target temp set button
+  document.getElementById("nextButton").addEventListener("click",changeState);
+
 });
 
 // updates the on-screen elements based on the model
@@ -20,12 +29,14 @@ function updateUI(updatedWatchObject){
   // Controls Page =============================================================================
   if (updatedWatchObject.getState() === undefined) {
     // Hey dont do that
-  } else {
-    document.getElementById("temp-status").innerText = updatedWatchObject.getTemp();
   }
+  else {
+    document.getElementById("state-status").innerText = updatedWatchObject.getState();
 
-  // Current time state
-  // document.getElementById("timer-status").innerText = "Time " + /*updatedWatchObject.timer.getMin() */+ ".";
+    document.getElementById("timer-status").innerText = updatedWatchObject.time.getTimeLeft();
+
+    document.getElementById("temp-status").innerText = updatedWatchObject.temp.getTemp();
+  }
 }
 
 function loadControls () {
@@ -50,10 +61,15 @@ function changeTimer(){
 
 //update the target temperature
 function setTemp(){
-  //watch.temp.setTarget(document.getElementById("tempSlider").value);
+    watch.temp.setTemp(document.getElementById("tempSlider").value);
 }
 
 //update the target cook time
 function setTimer(){
-  //watch.timer.setTarget(document.getElementById("timerSlider").value);
+    watch.time.setTimer(document.getElementById("timerSlider").value);
+}
+
+//
+function changeState(){
+  watch.changeState();
 }

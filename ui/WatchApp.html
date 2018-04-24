@@ -52,23 +52,25 @@
       <div class="col-3 center-align">
         <input type="button" class="button medium-button" value="< Back" onclick="loadCover()" />
       </div>
+      <!-- Next State -->
+      <div class="col-9 center-align">
+        <input type="button" class="button medium-button" id= "nextButton" value="Continue"/>
+      </div>
     </div>
     <!-- temperature, current cooking state,time left in state-->
     <div class="row">
       <div class="col-12 center-align">
-        <label id="temp-status"><font size="20">0</font><label>
-        <label><font size="20">ºF</font><label>
+        <label><font size="20"><span id="temp-status">--</span> ºF</font><label>
       </div>
     </div>
     <div class="row">
       <div class="col-12 center-align">
-        <label id="timer-status"><font size="5">0</font><label>
-        <label><font size="5">minute(s) remaining</font><label>
+        <label><font size="5"><span id="timer-status">--</span> minute(s) remaining</font><label>
       </div>
     </div>
     <div class="row">
       <div class="stateBox col-12 center-align">
-        <label id="state-status"><font size="5">Idle</font><label>
+        <label><font size="5"><span id="state-status">Idle</span></font><label>
       </div>
     </div>
 
@@ -83,7 +85,7 @@
       <div class="col-12 center-align">
         <label>Timer: </label>
         <input id="timerSlider" type="range" min="0" max="100">
-        <span id="Timer">0</span>
+        <span id="Timer">--</span>
         <label> minutes </label>
         <input type="button" class="button medium-button" id= "timerSet" value="Set"/>
     </div>
@@ -91,8 +93,8 @@
     <div class="row">
       <div class="col-12 center-align">
         <label> Temp: </label>
-        <input id="tempSlider" type="range" min="0" max="100">
-        <span id="Temp">0</span>
+        <input id="tempSlider" type="range" min="65" max="212">
+        <span id="Temp">--</span>
         <label> ºF </label>
         <input type="button" class="button medium-button" id= "tempSet" value="Set"/>
       </div>

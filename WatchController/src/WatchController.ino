@@ -20,7 +20,7 @@ Adafruit_SSD1306 display(OLED_DC, OLED_RESET, OLED_CS);
 
 
 const int button_pin = 0;
-//const int light_pin = 1;
+const int light_pin = 1;
 
 const int debounceDelay = 100; // 100ms debounce delay for main button
 
@@ -42,6 +42,8 @@ unsigned long lastUpdate = 0;
 float lastTemp;
 float curTemp;
 
+float tempTolerance = 10; //degrees
+
 //STATE====================================
 enum State
 {
@@ -51,7 +53,28 @@ enum State
   Cooling
 };
 
+enum State s = Idle;
 
+//LIGHT=====================================
+enum LightState
+{
+  On,
+  Off,
+};
+enum LightState ls = On; // Current State of the Light
+
+//Targets===================================
+
+//temperature
+int tempTarget = NULL;
+bool tempEnabled = false;
+
+
+//timer
+int timeTarget = NULL;
+bool timerEnabled = false;
+
+bool waitState = true;
 //Methods=================================================================
 
 
@@ -84,60 +107,6 @@ void getDebouncedButtonInput() {
     }
   }
 }
-//
-//
-// int getState(String event, String data){
-//   Serial.print(event);
-//   Serial.print(", data: ");
-//
-//   if (data != NULL){
-//     Serial.println(data);
-//
-//     int stateIndex = data.indexOf("state");
-//
-//     String curState = data.substring(stateIndex + 7, stateIndex + 8);
-//     Serial.println(curState);
-//
-//     int curStateVal = curState.toInt();
-//     switch (curStateVal){
-//       case 0:
-//       status = "Open";
-//       break;
-//
-//       case 1:
-//       status = "Closed";
-//       break;
-//
-//       case 2:
-//       status = "Opening";
-//       break;
-//
-//       case 3:
-//       status = "Closing";
-//       break;
-//     }
-//
-//
-//     int lightIndex = data.indexOf("lS");
-//
-//     String curLight = data.substring(lightIndex + 4, lightIndex + 5);
-//     Serial.print("CURRRR LIGHT: ");
-//     Serial.println(curLight);
-//
-//     int curLightVal = curLight.toInt();
-//
-//     if(curLightVal < 1){
-//       lState = "On";
-//     }
-//     else{
-//       lState = "Off";
-//     }
-//   }
-//
-//   else{
-//     Serial.println("NULL");
-//   }
-// }
 
 //CODE FROM: Particle TUTORIAL#4 – *uses OneWire library
 //https://docs.particle.io/tutorials/projects/maker-kit/#tutorial-4-temperature-logger
@@ -301,13 +270,156 @@ void readTemp(){
 
 }
 
+//switch to next state idle => prep => cooking => cooling
+void nextState() {
+  switch (s)
+  {
+    case Idle:
+      s = Prep;
+      ls = Off;
+      break;
+    case Prep:
+      s = Cooking;
+      ls = Off;
+      break;
+    case Cooking:
+      s = Cooling;
+      ls = Off;
+      break;
+    case Cooling:
+      s = Idle;
+      ls = On;
+      break;
+  }
+  publishState("");
+}
+
+bool isDone(){
+  if(tempEnabled && timerEnabled){
+    if(abs(curTemp - tempTarget) < tempTolerance && (millis() > timeTarget)){
+      return true;
+    }
+  }
+  else if(tempEnabled && !timerEnabled){
+    if(abs(curTemp - tempTarget) < tempTolerance){
+      return true;
+    }
+  }
+  else if(tempEnabled && !timerEnabled){
+    if(millis() >= timeTarget){
+      return true;
+    }
+  }
+  return false;
+}
+
+
+
+//check if button pressed: then move to next State
+void updateState () {
+  if (buttonStateChanged)
+  {
+    buttonStateChanged = false;
+    if (debouncedButtonState)
+    {
+      if(tempEnabled || timerEnabled){
+        if(waitState){
+          waitState = false;
+
+          Serial.println("change state");
+          nextState();
+
+        }
+      }
+      else{
+        //sendAlert;
+        // alert('Enter one or both target values for next stage');
+      }
+    }
+  }
+}
+
+void updateWaitState(){
+  waitState = isDone();
+  if(waitState){
+    ls = On;
+
+    tempEnabled = false;
+    timerEnabled = false;
+  }
+}
+
+const String topic = "thisWatch";
+//publishing
+int publishState(String arg) {
+  // Goal: Publish a valid JSON string containing the state of the light:
+  //   Ex:   "{"powered":true, "r":255, "g":255, "b":255}"
+  //   Note that each property has double quotes!
+
+//fix JSON string===============================
+  String data = "{";
+  //
+  data += "\"state\":";
+  data += s;
+  // data += ", ";
+  // //
+  // data += "\"aCE\":";
+  // if(autoCloseEnabled) {
+  //   data += "1";
+  // } else {
+  //   data += "0";
+  // }
+  // data += ", ";
+  // //
+  // data += "\"aCT\":";
+  // data += autoCloseTime;
+  // data += ", ";
+  // //
+  // data += "\"lS\":";
+  // data += ls;
+  // data += ", ";
+  // //
+  // data += "\"lB\":";
+  // data += lightBrightness;
+  // data += ", ";
+  // //
+  // data += "\"aOT\":";
+  // data += autoOffTime;
+  //
+  data += "}";
+
+  Serial.print("Data to send...");
+  Serial.println(data);
+
+  Particle.publish(topic, data, 60, PRIVATE);
+
+  return 0;
+}
+
+int changeTime(String arg){
+  timeTarget = atoi(arg);
+  Serial.print("timeTarget changed to ");
+  Serial.println(arg);
+  return 0;
+}
+
+int changeTemp(String arg){
+  tempTarget = atoi(arg);
+  Serial.print("timeTarget changed to ");
+  Serial.println(arg);
+  return 0;
+}
+
 // setup() runs once, when the device is first turned on.
 void setup() {
   Serial.begin(9600);
   //setup buttons
   pinMode(button_pin, INPUT_PULLUP);
-  // pinMode(light_pin, INPUT_PULLUP);
+  pinMode(light_pin, OUTPUT);
 
+  Particle.function("publishState",publishState);
+  Particle.function("changeTime",changeTime);
+  Particle.function("changeTemp",changeTemp);
 
   //setup display
   display.begin(SSD1306_SWITCHCAPVCC);
@@ -317,7 +429,7 @@ void setup() {
   display.setTextColor(WHITE); // text color
   display.setTextWrap(false);
 
-  // Particle.subscribe("cse222Garage/thisGarage",getState, MY_DEVICES);
+  // Particle.subscribe("thisWatch",getState, MY_DEVICES);
 
 }
 
@@ -326,40 +438,27 @@ void setup() {
 
 void loop() {
   getDebouncedButtonInput();
+  updateWaitState();
+  updateState();
 
-  if (buttonStateChanged)
-  {
-    buttonStateChanged = false;
-    if (debouncedButtonState)
-    {
-      Particle.publish("buttonPush", "", 60, PRIVATE);
-      Serial.println("publish button");
-    }
+  if(ls == On){
+    digitalWrite(light_pin, HIGH);
   }
-
-  // getDebouncedLightInput();
-  // if (lightStateChanged)
-  // {
-  //
-  //   lightStateChanged = false;
-  //   if (debouncedLightState)
-  //   {
-  //     Particle.publish("lightPush", "", 60, PRIVATE);
-  //     Serial.println("publish light");
-  //   }
-  // }
+  else{
+    digitalWrite(light_pin, LOW);
+  }
 
   display.clearDisplay();
   display.setCursor(0, 0);
   // The core of your code will likely live here.
   display.println("HI:");
-  display.println(status);
+  display.println(s);
 
   display.display();
   if(millis() - lastUpdate >= updateDelay){
     readTemp();
     lastUpdate = millis();
-    Particle.publish("temp," curTemp, 60, PRIVATE);
+    // Particle.publish("temp," "" + curTemp, 60, PRIVATE);
   }
 
 }
