@@ -3,14 +3,14 @@ var myDeviceId =            "1f003c001947343438323536";
 var topic =                 "cse222/thisWatch";
 
 function newWatchEvent(objectContainingData) {
+  console.log("Hi?");
+  console.dir(objectContainingData);
   // TODO: Parse the incoming state and update any listeners
   // Hints:
   //    1. Use console.dir() to show the state object on the console.
   //    2. Consider JSON.parse, but be aware that proper JSON enclosed property
   //       names in DOUBLE quotes ("proper":value)
   var obj = JSON.parse(objectContainingData.data);
-
-  console.log("Hello?");
   console.dir(obj);
   console.log(obj.state);
 
@@ -33,9 +33,28 @@ function newWatchEvent(objectContainingData) {
     console.log("Cooling");
     break;
   }
-  console.log(watch.state);
 
+  //update enabled timer
+  if(obj.timerEnabled == 1){
+    watch.time.enabled = true;
+  }
+  else{
+    watch.time.enabled = false;
+  }
 
+  //update enabled temp
+  if(obj.tempEnabled == 1){
+    watch.temp.enabled = true;
+  }
+  else{
+    watch.temp.enabled = false;
+  }
+
+  //update remaining time
+  watch.time.curTime = obj.remainingTime;
+
+  //update temp
+  watch.time.curTemp = obj.curTemp;
 
   updateWatch();
 }
@@ -55,6 +74,16 @@ var watch = {
     if(watch.temp.enabled || watch.time.enabled){
       watch.buttonPush();
       watch.sendState(this.state);
+
+      if(watch.temp.enabled && (watch.temp.curTemp > watch.temp.tempTarget)){
+        alert('Not at target temperature yet');
+      }
+
+      console.log(watch.time.curTime);
+      console.log(watch.time.timeTarget);
+      if(watch.time.enabled && (watch.time.curTime > watch.time.timeTarget)){
+        alert('Not at target time yet');
+      }
     }
     else {
       alert("Enter one or both target values to continue.");
@@ -75,10 +104,10 @@ var watch = {
   temp: {
     enabled: false,
     curTemp: 0,
-    tempTarget: 30, // 30 deg
+    tempTarget: 0, // 30 deg
 
     getTemp: function(){
-      return watch.time.curTime;
+      return watch.time.curTemp;
     },
 
     //update TARGET temperature
@@ -136,9 +165,11 @@ function setup() {
   // Get ready to subscribe to the event stream
   function onSuccess(stream) {
     // DONE:  This will "subscribe' to the stream and get the state"
-    console.log("getEventStream success");
-    stream.on("event", newWatchEvent);
-
+    // console.log("getEventStream success");
+    stream.on('event', function(data) {
+      // console.log("Event: ", data);
+      newWatchEvent(data);
+    });
     // NOTE: This is here in the callback to the subscribe --- it will request the state
     //       once successbully subscribed.
   }
@@ -161,14 +192,16 @@ function setObserverFunc(observerFunc){
   updateWatch();
 }
 
-watch.particle.getEventStream( { name: topic, auth: myParticleAccessToken }).then(
-  function (stream) {
-    // DONE:  This will "subscribe' to the stream and get the state"
-
-    stream.on("event", newWatchEvent);
-    console.log("getEventStream success");
-
-    // NOTE: This is here in the callback to the subscribe --- it will request the state
-    //       once successbully subscribed.
-  },
-  function (e) { console.log("getEventStream call failed"), console.dir(e) });
+// watch.particle.getEventStream( { deviceId: 'mine', auth: myParticleAccessToken }).then(
+//   function (stream) {
+//     // DONE:  This will "subscribe' to the stream and get the state"
+//
+//     stream.on('event', function(data) {
+//     console.log("Event: ", data);
+//     newWatchEvent(data);
+//   });
+//
+//     // NOTE: This is here in the callback to the subscribe --- it will request the state
+//     //       once successbully subscribed.
+//   },
+//   function (e) { console.log("getEventStream call failed"), console.dir(e) });

@@ -66,12 +66,12 @@ enum LightState ls = On; // Current State of the Light
 //Targets===================================
 
 //temperature
-int tempTarget = NULL;
+int tempTarget = 0;
 bool tempEnabled = false;
 
 
 //timer
-unsigned long timeTarget = NULL;
+unsigned long timeTarget = 0;
 bool timerEnabled = false;
 
 bool waitState = true;
@@ -299,21 +299,35 @@ void nextState() {
 }
 
 bool isReady(){
-  if(tempEnabled && timerEnabled){
-    if(abs(curTemp - tempTarget) < tempTolerance && (millis() > timeTarget)){
+  //both temp and timer
+  if(s == Idle){
+    return true;
+  }
+  else if(tempEnabled && timerEnabled){
+    if(abs(curTemp - tempTarget) < tempTolerance && (millis()- startTime >= timeTarget)){
       Serial.print("successfully ended both cases");
+
+      tempEnabled = false;
+      timerEnabled = false;
       return true;
     }
   }
-  else if(tempEnabled && !timerEnabled){
+  //just temp
+  else if(tempEnabled){
     if(abs(curTemp - tempTarget) < tempTolerance){
       Serial.print("successfully ended temp case");
+
+      tempEnabled = false;
       return true;
     }
   }
-  else if(tempEnabled && !timerEnabled){
+  //just timer
+  else if(timerEnabled){
     if(millis()- startTime >= timeTarget){
       Serial.print("successfully ended time case");
+
+      timerEnabled = false;
+
       return true;
     }
   }
@@ -329,32 +343,32 @@ void updateState () {
     buttonStateChanged = false;
     if (debouncedButtonState)
     {
-      // if(tempEnabled || timerEnabled){
-      //   Serial.println("check waitState" + waitState);
+      if(tempEnabled || timerEnabled){
 
-        // if(waitState){
-        //   waitState = false;
+        Serial.println("check waitState");
+        Serial.println(waitState);
+        if(waitState){
+          startTime = millis();
 
+          waitState = false;
           Serial.println("change state");
           nextState();
 
-        // }
-      // }
-      // else{
-      //   Serial.println("Enter one or both target values to continue");
-      // }
+        }
+      }
+      else{
+        Serial.println("Enter one or both target values to continue");
+      }
     }
   }
 }
 
 // checks if pot is in between states
 void updateWaitState(){
-  waitState = isReady();
-  if(waitState){
+  if(!waitState)
+    waitState = isReady();
+  else{
     ls = On;
-
-    tempEnabled = false;
-    timerEnabled = false;
   }
 
 }
@@ -389,13 +403,25 @@ int publishState(String arg) {
   }
   data += ", ";
 
-  // data += "\"remainingTime\":";
-  // data += "" + ((timeTarget - (millis()- startTime)) / 6000);
-  // data += ", ";
 
-  // data += "\"curTemp\":";
-  // data += "" + (int)curTemp;
-  // data += ", ";
+
+  data += "\"remainingTime\":";
+  if(timerEnabled && !waitState){
+    if((millis()- startTime) >= timeTarget){
+      data += 0;
+    }
+    else{
+      data += ((timeTarget - (millis()- startTime)) / 60000);
+    }
+  }
+  else{
+    data += 0;
+  }
+  data += ", ";
+
+  data += "\"curTemp\":";
+  // data += curTemp;
+  data += "0";
 
   data += "}";
 
@@ -415,7 +441,7 @@ int changeTime(String arg){
   Serial.println(arg);
 
   timerEnabled = true;
-  startTime = millis();
+  publishState("");
   return 0;
 }
 
@@ -426,10 +452,28 @@ int changeTemp(String arg){
   Serial.println(arg);
 
   tempEnabled = true;
-
+  publishState("");
   return 0;
 }
 
+int trigButton(String arg){
+  if(tempEnabled || timerEnabled){
+
+    Serial.println("check waitState");
+    Serial.println(waitState);
+    if(waitState){
+      startTime = millis();
+      waitState = false;
+
+      Serial.println("change state");
+      nextState();
+
+    }
+  }
+  else{
+    Serial.println("Enter one or both target values to continue");
+  }
+}
 // setup() runs once, when the device is first turned on.
 void setup() {
   Serial.begin(9600);
@@ -440,6 +484,7 @@ void setup() {
   Particle.function("publishState",publishState);
   Particle.function("changeTime",changeTime);
   Particle.function("changeTemp",changeTemp);
+  Particle.function("trigButton",trigButton);
   //setup display
   display.begin(SSD1306_SWITCHCAPVCC);
 
@@ -499,7 +544,14 @@ void loop() {
   if(millis() - lastUpdate >= updateDelay){
     readTemp();
     lastUpdate = millis();
-    // publishState("");
+    publishState("");
+
+    Serial.println(waitState);
+    Serial.println("timeTarget:");
+    Serial.println(timeTarget);
+    Serial.println("elapsed:");
+    Serial.println(millis()- startTime);
+    Serial.println(timerEnabled);
   }
 
 }
