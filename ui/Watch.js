@@ -1,6 +1,6 @@
 var myParticleAccessToken = "f76cd4700e1489f30c1fdf0f54d702d63236800c";//find out when plug in
 var myDeviceId =            "1f003c001947343438323536";
-var topic =                 "thisWatch";
+var topic =                 "cse222/thisWatch";
 
 function newWatchEvent(objectContainingData) {
   // TODO: Parse the incoming state and update any listeners
@@ -164,8 +164,9 @@ function setObserverFunc(observerFunc){
 watch.particle.getEventStream( { name: topic, auth: myParticleAccessToken }).then(
   function (stream) {
     // DONE:  This will "subscribe' to the stream and get the state"
-    console.log("getEventStream success");
+
     stream.on("event", newWatchEvent);
+    console.log("getEventStream success");
 
     // NOTE: This is here in the callback to the subscribe --- it will request the state
     //       once successbully subscribed.

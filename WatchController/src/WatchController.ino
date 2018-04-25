@@ -329,8 +329,8 @@ void updateState () {
     buttonStateChanged = false;
     if (debouncedButtonState)
     {
-      if(tempEnabled || timerEnabled){
-        Serial.println("check waitState" + waitState);
+      // if(tempEnabled || timerEnabled){
+      //   Serial.println("check waitState" + waitState);
 
         // if(waitState){
         //   waitState = false;
@@ -339,10 +339,10 @@ void updateState () {
           nextState();
 
         // }
-      }
-      else{
-        Serial.println("Enter one or both target values to continue");
-      }
+      // }
+      // else{
+      //   Serial.println("Enter one or both target values to continue");
+      // }
     }
   }
 }
@@ -359,7 +359,7 @@ void updateWaitState(){
 
 }
 
-const String topic = "thisWatch";
+const String topic = "cse222/thisWatch";
 //publishing
 int publishState(String arg) {
   // Goal: Publish a valid JSON string containing the state of the light:
