@@ -50,22 +50,28 @@ var watch = {
   },
 
   changeState: function(){
-    watch.buttonPush();
-    watch.sendState(this.state);
+    if(watch.temp.enabled || watch.time.enabled){
+      watch.buttonPush();
+      watch.sendState(this.state);
+    }
+    else {
+      alert("Enter one or both target values to continue.");
+    }
   },
 
 
   buttonPush: function() {
-    console.log("(fake) button pushed");
-    callParticleFunction("trigButton", "test");
+      console.log("(fake) button pushed");
+      callParticleFunction("trigButton", "test");
   },
 
   sendState: function(myState){
     this.state = myState;
-    callParticleFunction("publishState", "" + this.state);
+    // callParticleFunction("publishState", "" + this.state);
   },
 
   temp: {
+    enabled: false,
     curTemp: 0,
     tempTarget: 30, // 30 deg
 
@@ -73,6 +79,9 @@ var watch = {
       return watch.time.curTime;
     },
 
+    // isEnabled: function(){
+    //   watch.temp.enabled = true;
+    // }
     // //update CURRENT temperature
     // changeTemp: function(newTemp){
     //   watch.temp.tempTarget = newTemp;
@@ -81,13 +90,14 @@ var watch = {
 
     //update TARGET temperature
     setTemp: function(nextTemp){
-      console.log("set Temp");
       watch.temp.tempTarget = nextTemp;
-      // callParticleFunction("publishState",""+ this.tempTarget);
+      callParticleFunction("changeTemp",""+ this.tempTarget);
+      console.log("set Temp to " + watch.temp.tempTarget);
     }
   },
 
   time: {
+    enabled: false,
     curTime: 0,
     timeTarget: 30, // 30 deg
 
@@ -105,7 +115,7 @@ var watch = {
     setTimer: function(nextTime){
       console.log("set Timer");
       watch.time.timeTarget = nextTime;
-      // callParticleFunction("publishState","" + this.timeTarget)
+      callParticleFunction("changeTime","" + this.timeTarget)
     }
   },
   light: {
@@ -129,7 +139,7 @@ function callParticleFunction(functionName, functionArg) {
   function onSuccess(e) { console.log(functionName + " call success"); }
   function onFailure(e) { console.log(functionName + " call failed");
   console.dir(e); }
-  // watch.particle.callFunction(functionData).then(onSuccess,onFailure);
+  watch.particle.callFunction(functionData).then(onSuccess,onFailure);
 
   updateWatch();
 }

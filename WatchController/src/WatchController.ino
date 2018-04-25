@@ -19,8 +19,8 @@ Adafruit_SSD1306 display(OLED_DC, OLED_RESET, OLED_CS);
 
 
 
-const int button_pin = 0;
-const int light_pin = 1;
+const int button_pin = 1;
+const int light_pin = 2;
 
 const int debounceDelay = 100; // 100ms debounce delay for main button
 
@@ -71,10 +71,14 @@ bool tempEnabled = false;
 
 
 //timer
-int timeTarget = NULL;
+unsigned long timeTarget = NULL;
 bool timerEnabled = false;
 
 bool waitState = true;
+
+//==========================================
+unsigned long startTime = 0;
+
 //Methods=================================================================
 
 
@@ -294,22 +298,26 @@ void nextState() {
   publishState("");
 }
 
-bool isDone(){
+bool isReady(){
   if(tempEnabled && timerEnabled){
     if(abs(curTemp - tempTarget) < tempTolerance && (millis() > timeTarget)){
+      Serial.print("successfully ended both cases");
       return true;
     }
   }
   else if(tempEnabled && !timerEnabled){
     if(abs(curTemp - tempTarget) < tempTolerance){
+      Serial.print("successfully ended temp case");
       return true;
     }
   }
   else if(tempEnabled && !timerEnabled){
-    if(millis() >= timeTarget){
+    if(millis()- startTime >= timeTarget){
+      Serial.print("successfully ended time case");
       return true;
     }
   }
+
   return false;
 }
 
@@ -323,6 +331,8 @@ void updateState () {
     if (debouncedButtonState)
     {
       if(tempEnabled || timerEnabled){
+        Serial.println("check waitState" + waitState);
+
         if(waitState){
           waitState = false;
 
@@ -332,21 +342,24 @@ void updateState () {
         }
       }
       else{
-        //sendAlert;
-        // alert('Enter one or both target values for next stage');
+        Serial.println("Enter one or both target values to continue");
       }
     }
   }
 }
 
+// checks if pot is in between states
 void updateWaitState(){
-  waitState = isDone();
+  waitState = isReady();
   if(waitState){
     ls = On;
 
     tempEnabled = false;
     timerEnabled = false;
+
+    Serial.println("waitState");
   }
+
 }
 
 const String topic = "thisWatch";
@@ -361,31 +374,26 @@ int publishState(String arg) {
   //
   data += "\"state\":";
   data += s;
-  // data += ", ";
-  // //
-  // data += "\"aCE\":";
-  // if(autoCloseEnabled) {
-  //   data += "1";
-  // } else {
-  //   data += "0";
-  // }
-  // data += ", ";
-  // //
-  // data += "\"aCT\":";
-  // data += autoCloseTime;
-  // data += ", ";
-  // //
-  // data += "\"lS\":";
-  // data += ls;
-  // data += ", ";
-  // //
-  // data += "\"lB\":";
-  // data += lightBrightness;
-  // data += ", ";
-  // //
-  // data += "\"aOT\":";
-  // data += autoOffTime;
+  data += ", ";
   //
+  data += "\"timerEnabled\":";
+  if(timerEnabled) {
+    data += "1";
+  } else {
+    data += "0";
+  }
+  data += ", ";
+
+  data += "\"tempEnabled\":";
+  if(tempEnabled) {
+    data += "1";
+  } else {
+    data += "0";
+  }
+  data += ", ";
+
+  data += "\"remainingTime\":";
+  data += "" + ((timeTarget - (millis()- startTime)) / 6000);
   data += "}";
 
   Serial.print("Data to send...");
@@ -395,18 +403,27 @@ int publishState(String arg) {
 
   return 0;
 }
-
+//cloud function to set target time
 int changeTime(String arg){
-  timeTarget = atoi(arg);
+  int targetMin = atoi(arg);
+  //convert to millis
+  timeTarget = targetMin * 60000;
   Serial.print("timeTarget changed to ");
   Serial.println(arg);
+
+  timerEnabled = true;
+  startTime = millis();
   return 0;
 }
 
+//cloud function to set tartget
 int changeTemp(String arg){
   tempTarget = atoi(arg);
-  Serial.print("timeTarget changed to ");
+  Serial.print("tempTarget changed to ");
   Serial.println(arg);
+
+  tempEnabled = true;
+
   return 0;
 }
 
@@ -420,7 +437,6 @@ void setup() {
   Particle.function("publishState",publishState);
   Particle.function("changeTime",changeTime);
   Particle.function("changeTemp",changeTemp);
-
   //setup display
   display.begin(SSD1306_SWITCHCAPVCC);
 
@@ -428,8 +444,6 @@ void setup() {
   display.setTextSize(2);       // text size
   display.setTextColor(WHITE); // text color
   display.setTextWrap(false);
-
-  // Particle.subscribe("thisWatch",getState, MY_DEVICES);
 
 }
 
@@ -451,14 +465,38 @@ void loop() {
   display.clearDisplay();
   display.setCursor(0, 0);
   // The core of your code will likely live here.
-  display.println("HI:");
-  display.println(s);
+  display.println("State:");
+  String cState = "";
+  switch (s){
+      case 0:
+      cState = "Idle";
+      break;
 
+      case 1:
+      cState = "Prep";
+      break;
+
+      case 2:
+      cState = "Cooking";
+      break;
+
+      case 3:
+      cState = "Cooling";
+      break;
+  }
+  display.println(cState);
+
+  if(waitState){
+    display.println("READY TO");
+    display.println("CONTINUE");
+  }
   display.display();
+
+//updating temperature
   if(millis() - lastUpdate >= updateDelay){
     readTemp();
     lastUpdate = millis();
-    // Particle.publish("temp," "" + curTemp, 60, PRIVATE);
+    // publishState("");
   }
 
 }
