@@ -32,7 +32,7 @@ bool buttonStateChanged = false;
 
 //Temp Sensor===================================
 
-const int updateDelay = 3000;//reads temp every 5 sec
+const int updateDelay = 2000;//reads temp every 2 sec
 
 
 OneWire ds = OneWire(D0);  // 1-wire signal on pin D4
@@ -42,7 +42,7 @@ unsigned long lastUpdate = 0;
 float lastTemp;
 float curTemp;
 
-float tempTolerance = 10; //degrees
+float tempTolerance = 4; //degrees
 
 //STATE====================================
 enum State
@@ -81,7 +81,7 @@ unsigned long startTime = 0;
 
 //Methods=================================================================
 
-
+//checks button input
 void getDebouncedButtonInput() {
   int button_state = digitalRead(button_pin);
   // Serial.println(button_state);
@@ -210,13 +210,13 @@ void readTemp(){
 
   // transfer and print the values
 
-  Serial.print("  Data = ");
-  Serial.print(present, HEX);
-  Serial.print(" ");
+  // Serial.print("  Data = ");
+  // Serial.print(present, HEX);
+  // Serial.print(" ");
   for ( i = 0; i < 9; i++) {           // we need 9 bytes
     data[i] = ds.read();
-    Serial.print(data[i], HEX);
-    Serial.print(" ");
+    // Serial.print(data[i], HEX);
+    // Serial.print(" ");
   }
   Serial.print(" CRC=");
   Serial.print(OneWire::crc8(data, 8), HEX);
@@ -299,16 +299,20 @@ void nextState() {
 }
 
 bool isReady(){
-  //both temp and timer
+
   if(s == Idle){
     return true;
   }
+  //both temp and timer
   else if(tempEnabled && timerEnabled){
     if(abs(curTemp - tempTarget) < tempTolerance && (millis()- startTime >= timeTarget)){
       Serial.print("successfully ended both cases");
 
       tempEnabled = false;
       timerEnabled = false;
+
+      Particle.publish("ready", "Done", 60, PRIVATE);
+
       return true;
     }
   }
@@ -318,6 +322,9 @@ bool isReady(){
       Serial.print("successfully ended temp case");
 
       tempEnabled = false;
+
+      Particle.publish("ready", "Done", 60, PRIVATE);
+
       return true;
     }
   }
@@ -327,6 +334,8 @@ bool isReady(){
       Serial.print("successfully ended time case");
 
       timerEnabled = false;
+
+      Particle.publish("ready", "Done", 60, PRIVATE);
 
       return true;
     }
@@ -420,8 +429,7 @@ int publishState(String arg) {
   data += ", ";
 
   data += "\"curTemp\":";
-  // data += curTemp;
-  data += "0";
+  data += (int)curTemp;
 
   data += "}";
 
@@ -552,6 +560,11 @@ void loop() {
     Serial.println("elapsed:");
     Serial.println(millis()- startTime);
     Serial.println(timerEnabled);
+
+    Serial.println("tempTarget:");
+    Serial.println(tempTarget);
+    Serial.println("tempEnabled:");
+    Serial.println(tempEnabled);
   }
 
 }
