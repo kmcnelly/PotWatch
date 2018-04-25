@@ -317,7 +317,6 @@ bool isReady(){
       return true;
     }
   }
-
   return false;
 }
 
@@ -333,13 +332,13 @@ void updateState () {
       if(tempEnabled || timerEnabled){
         Serial.println("check waitState" + waitState);
 
-        if(waitState){
-          waitState = false;
+        // if(waitState){
+        //   waitState = false;
 
           Serial.println("change state");
           nextState();
 
-        }
+        // }
       }
       else{
         Serial.println("Enter one or both target values to continue");
@@ -356,8 +355,6 @@ void updateWaitState(){
 
     tempEnabled = false;
     timerEnabled = false;
-
-    Serial.println("waitState");
   }
 
 }
@@ -392,8 +389,14 @@ int publishState(String arg) {
   }
   data += ", ";
 
-  data += "\"remainingTime\":";
-  data += "" + ((timeTarget - (millis()- startTime)) / 6000);
+  // data += "\"remainingTime\":";
+  // data += "" + ((timeTarget - (millis()- startTime)) / 6000);
+  // data += ", ";
+
+  // data += "\"curTemp\":";
+  // data += "" + (int)curTemp;
+  // data += ", ";
+
   data += "}";
 
   Serial.print("Data to send...");

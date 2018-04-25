@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", function (){
 
   setObserverFunc(updateUI);
   loadCover();
-  // setup();
+  setup();
   // Controls Page =============================================================================
 
   //listen for timer

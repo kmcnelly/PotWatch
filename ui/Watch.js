@@ -10,7 +10,7 @@ function newWatchEvent(objectContainingData) {
   //       names in DOUBLE quotes ("proper":value)
   var obj = JSON.parse(objectContainingData.data);
 
-  //console.log(objectContainingData);
+  console.log("Hello?");
   console.dir(obj);
   console.log(obj.state);
 
@@ -34,6 +34,8 @@ function newWatchEvent(objectContainingData) {
     break;
   }
   console.log(watch.state);
+
+
 
   updateWatch();
 }
@@ -67,7 +69,7 @@ var watch = {
 
   sendState: function(myState){
     this.state = myState;
-    // callParticleFunction("publishState", "" + this.state);
+    callParticleFunction("publishState", "" + this.state);
   },
 
   temp: {
@@ -78,15 +80,6 @@ var watch = {
     getTemp: function(){
       return watch.time.curTime;
     },
-
-    // isEnabled: function(){
-    //   watch.temp.enabled = true;
-    // }
-    // //update CURRENT temperature
-    // changeTemp: function(newTemp){
-    //   watch.temp.tempTarget = newTemp;
-    //   // callParticleFunction("changeTemp","" + this.curTemp)
-    // },
 
     //update TARGET temperature
     setTemp: function(nextTemp){
@@ -116,13 +109,6 @@ var watch = {
       console.log("set Timer");
       watch.time.timeTarget = nextTime;
       callParticleFunction("changeTime","" + this.timeTarget)
-    }
-  },
-  light: {
-    on: true,
-
-    getState: function() {
-      return watch.light.on;
     }
   },
 
