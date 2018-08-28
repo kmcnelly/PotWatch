@@ -1,4 +1,4 @@
-# project-mcnelly-plan
+# project-mcnelly-PotWatch
 The PotWatch : a water temperature tracker and alert device.
 
 'docs' – contains all files regarding the background development of the app as well as an explained structure
